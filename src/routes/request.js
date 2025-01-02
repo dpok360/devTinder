@@ -3,6 +3,7 @@ const { userAuth } = require('../utils/validation');
 const requestRouter = express.Router();
 const ConnectionRequest = require('../models/connectionRequest');
 const User = require('../models/user');
+const { json } = require('stream/consumers');
 
 requestRouter.post(
   '/request/send/:status/:toUserId',
@@ -54,6 +55,37 @@ requestRouter.post(
       });
     } catch (error) {
       res.status(400).send({ ERROR: error.message });
+    }
+  }
+);
+
+requestRouter.post(
+  '/request/review/:status/:requestId',
+  userAuth,
+  async (req, res) => {
+    try {
+      const { status, requestId } = req.params;
+      const loggedInUser = req.user;
+      const allowedStatus = ['accepted', 'rejected'];
+      if (!allowedStatus.includes(status)) {
+        return res.status(400).json({ message: 'status not allowed' });
+      }
+
+      const connectionRequest = await ConnectionRequest.findOne({
+        _id: requestId,
+        toUserId: loggedInUser._id,
+        status: 'interested',
+      });
+      if (!connectionRequest) {
+        return res.status(400).json({ mesage: 'Connection request not found' });
+      }
+      connectionRequest.status = status;
+      const data = await connectionRequest.save();
+      res.json({ message: 'connection request ' + status, data });
+    } catch (error) {
+      res.status(400).send({
+        ERROR: error.message,
+      });
     }
   }
 );
