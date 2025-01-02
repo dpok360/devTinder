@@ -2,25 +2,19 @@ const express = require('express');
 const connectDB = require('./config/database');
 const app = express();
 const User = require('./models/user');
+const cookieParser = require('cookie-parser');
 
 app.use(express.json());
+app.use(cookieParser());
 
-app.post('/signup', async (req, res) => {
-  //creating a new instance of the User model
-  const user = new User(req.body);
+const authRouter = require('./routes/auth');
+const profileRouter = require('./routes/profile');
+const requestRouter = require('./routes/request');
 
-  try {
-    await user.save();
-    res.send('User added successfully');
-  } catch (error) {
-    res.status(400).send({
-      message: 'Error saving user ',
-      err: error.message,
-    });
-  }
-});
+app.use('/', authRouter);
+app.use('/', profileRouter);
+app.use('/', requestRouter);
 
-//get user by email
 app.get('/user', async (req, res) => {
   const userEmail = req.body.emailId;
 
