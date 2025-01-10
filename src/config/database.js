@@ -1,10 +1,13 @@
 const mongoose = require('mongoose');
 
 const connectDB = async () => {
+  const DB_STRING = process.env.DB_CONNECTION_STRING.replace(
+    '<password>',
+    process.env.DB_CONN_SECRET
+  );
+
   try {
-    const coonection = await mongoose.connect(
-      'mongodb+srv://sumirtraders:d8wYb1IEp1doIdN3@cluster0.dqb7k.mongodb.net/devTinder'
-    );
+    const coonection = await mongoose.connect(DB_STRING);
     if (coonection) {
       console.log('DB connection successfull');
     }
