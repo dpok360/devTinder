@@ -3,7 +3,7 @@ const { userAuth } = require('../utils/validation');
 const requestRouter = express.Router();
 const ConnectionRequest = require('../models/connectionRequest');
 const User = require('../models/user');
-const { json } = require('stream/consumers');
+const sendEmail = require('../utils/sendEmails');
 
 requestRouter.post(
   '/request/send/:status/:toUserId',
@@ -48,6 +48,12 @@ requestRouter.post(
       });
 
       const data = await connectionRequest.save();
+      const emailRes = await sendEmail.run(
+        'A new friend request from' + req.user.firstName,
+        req.user.firstName + 'is' + status + 'in' + toUser.firstName
+      );
+      console.log(emailRes);
+
       res.json({
         message:
           req.user.firstName + ' is ' + status + ' in ' + toUser.firstName,
@@ -80,7 +86,7 @@ requestRouter.post(
         return res.status(400).json({ mesage: 'Connection request not found' });
       }
       connectionRequest.status = status;
-      const data = await connectionRequest.save();
+
       res.json({ message: 'connection request ' + status, data });
     } catch (error) {
       res.status(400).send({

@@ -22,9 +22,11 @@ profileRouter.patch('/profile/edit', userAuth, async (req, res) => {
     if (!validateProfileData(req)) {
       throw new Error('Invalid edit request');
     }
-    const loggedUser = req.user;
+    let loggedUser = req.user;
     Object.keys(req.body).forEach((key) => (loggedUser[key] = req.body[key]));
-    console.log(loggedUser);
+
+    await loggedUser.save();
+
     res.json({
       message: `${loggedUser.firstName}, your profile has been edited succesfully`,
       data: loggedUser,
