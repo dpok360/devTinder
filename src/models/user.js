@@ -45,6 +45,13 @@ const userSchema = new mongoose.Schema(
         message: 'incorecct value type',
       },
     },
+    isPremium: {
+      type: Boolean,
+      default: false,
+    },
+    membershipType: {
+      type: String,
+    },
     photoUrl: {
       type: String,
       default:

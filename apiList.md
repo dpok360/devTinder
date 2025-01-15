@@ -121,3 +121,27 @@ proxy_cache_bypass $http_upgrade;
 - write code for SESClient
 - Write code for sending email address
 - Make the email dynamic by passing more params to the run function
+
+## Scheduling cron jobs in NodeJs
+
+- Installing node-cron
+- Learn about cron expressions syntax
+- schedule a job
+- install date-fns
+- Find all the unique email ids
+- send emails
+- explore queue mechannism
+- Amazone SES bulk emails
+- Make sendEmails functions dynamic
+
+## Razorpay Payment Gateway Integration
+
+- Sign up on Razorpay & complete kyc
+- Create a UI for premium page
+- Creating an API for create order in BE
+- Initialized Razorpay in utuils
+- Creating order on Razorpay
+- Create Schema and model
+- Saved the API in payments collection
+- make the API dynamic
+- Setup Razorpay on your live API
