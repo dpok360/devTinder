@@ -145,3 +145,7 @@ proxy_cache_bypass $http_upgrade;
 - Saved the API in payments collection
 - make the API dynamic
 - Setup Razorpay on your live API
+
+## WebSockets & Socket.io live chat
+
+- npm install socket.io
