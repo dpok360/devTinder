@@ -1,6 +1,7 @@
 const socket = require('socket.io');
 const crypto = require('crypto');
 const Chat = require('../models/chat');
+const ConnectionRequest = require('../models/connectionRequest');
 
 const getSecretRoomId = (userId, targetUserId) => {
   return crypto
@@ -23,14 +24,13 @@ const initializeServer = (server) => {
       console.log(firstName + ' Joining Room ' + roomId);
       socket.join(roomId);
     });
+
     socket.on(
       'sendMessage',
       async ({ firstName, lastName, userId, targetUserId, newMessages }) => {
-        //Save message to database
-        try {
-          const roomId = getSecretRoomId(userId, targetUserId);
-          console.log(firstName + ' ' + newMessages);
+        //TODO: socket authentication -> verify jwt
 
+        try {
           //check if userId & targetUserId are friend
           const existingConnection = await ConnectionRequest.findOne({
             $or: [
@@ -45,7 +45,8 @@ const initializeServer = (server) => {
                 status: 'accepted',
               },
             ],
-          }).lean();
+          });
+
           // If not connected, reject the message
           if (!existingConnection) {
             socket.emit('message_response', {
@@ -54,7 +55,11 @@ const initializeServer = (server) => {
             });
             return;
           }
+          //create unnique room ID
+          const roomId = getSecretRoomId(userId, targetUserId);
+          console.log(firstName + ' ' + newMessages);
 
+          //Save message to database
           let chat = await Chat.findOne({
             participants: { $all: [userId, targetUserId] },
           });
