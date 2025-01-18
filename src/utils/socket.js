@@ -1,5 +1,6 @@
 const socket = require('socket.io');
 const crypto = require('crypto');
+const Chat = require('../models/chat');
 
 const getSecretRoomId = (userId, targetUserId) => {
   return crypto
@@ -24,13 +25,61 @@ const initializeServer = (server) => {
     });
     socket.on(
       'sendMessage',
-      ({ firstName, userId, targetUserId, newMessages }) => {
-        const roomId = getSecretRoomId(userId, targetUserId);
-        console.log(firstName + ' ' + newMessages);
-        io.to(roomId).emit('messageReceived', { firstName, newMessages });
+      async ({ firstName, lastName, userId, targetUserId, newMessages }) => {
+        //Save message to database
+        try {
+          const roomId = getSecretRoomId(userId, targetUserId);
+          console.log(firstName + ' ' + newMessages);
+
+          //check if userId & targetUserId are friend
+          const existingConnection = await ConnectionRequest.findOne({
+            $or: [
+              {
+                fromUserId: targetUserId,
+                toUserId: userId,
+                status: 'accepted',
+              },
+              {
+                fromUserId: userId,
+                toUserId: targetUserId,
+                status: 'accepted',
+              },
+            ],
+          }).lean();
+          // If not connected, reject the message
+          if (!existingConnection) {
+            socket.emit('message_response', {
+              success: false,
+              error: 'You must be connected with the user to send messages',
+            });
+            return;
+          }
+
+          let chat = await Chat.findOne({
+            participants: { $all: [userId, targetUserId] },
+          });
+          if (!chat) {
+            chat = new Chat({
+              participants: [userId, targetUserId],
+              messages: [],
+            });
+          }
+          chat.messages.push({
+            senderId: userId,
+            text: newMessages,
+          });
+
+          await chat.save();
+          io.to(roomId).emit('messageReceived', {
+            firstName,
+            lastName,
+            newMessages,
+          });
+        } catch (error) {
+          console.error(error.message);
+        }
       }
     );
-
     socket.on('disconnect', () => {});
   });
 };

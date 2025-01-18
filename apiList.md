@@ -149,3 +149,13 @@ proxy_cache_bypass $http_upgrade;
 ## WebSockets & Socket.io live chat
 
 - npm install socket.io
+- initialized websocket server
+- initalized chat
+- createSocketConnection
+- Listen to events
+
+## Chat Schema & Modal
+
+- create chat / message schema & modal
+
+## TO DO -> authentication in websocket / only chat to user wo are connected
