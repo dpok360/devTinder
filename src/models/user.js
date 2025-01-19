@@ -78,7 +78,7 @@ userSchema.index({ firstName: 1, lastName: 1 });
 //mongoose schema methods
 userSchema.methods.getJWT = async function () {
   const user = this;
-  const token = jwt.sign({ _id: user._id }, 'deepak@123', {
+  const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
     expiresIn: '1d',
   });
   return token;

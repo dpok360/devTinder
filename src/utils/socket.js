@@ -2,6 +2,7 @@ const socket = require('socket.io');
 const crypto = require('crypto');
 const Chat = require('../models/chat');
 const ConnectionRequest = require('../models/connectionRequest');
+const jwt = require('jsonwebtoken');
 
 const getSecretRoomId = (userId, targetUserId) => {
   return crypto
@@ -19,17 +20,25 @@ const initializeServer = (server) => {
   });
   io.on('connection', (socket) => {
     //handle events
-    socket.on('joinChat', ({ firstName, userId, targetUserId }) => {
+    socket.on('joinChat', ({ firstName, userId, targetUserId, token }) => {
       const roomId = getSecretRoomId(userId, targetUserId);
-      console.log(firstName + ' Joining Room ' + roomId);
-      socket.join(roomId);
+      try {
+        //socket authentication -> verify jwt
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (decoded._id !== userId) {
+          console.log('No token!.Please Login First');
+          throw new Error('Invalid token!.User not authorized');
+        }
+        console.log(firstName + ' Joining Room ' + roomId);
+        socket.join(roomId);
+      } catch (error) {
+        console.error(error.message);
+      }
     });
 
     socket.on(
       'sendMessage',
       async ({ firstName, lastName, userId, targetUserId, newMessages }) => {
-        //TODO: socket authentication -> verify jwt
-
         try {
           //check if userId & targetUserId are friend
           const existingConnection = await ConnectionRequest.findOne({
@@ -73,7 +82,6 @@ const initializeServer = (server) => {
             senderId: userId,
             text: newMessages,
           });
-
           await chat.save();
           io.to(roomId).emit('messageReceived', {
             firstName,
