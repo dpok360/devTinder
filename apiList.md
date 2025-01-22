@@ -157,5 +157,3 @@ proxy_cache_bypass $http_upgrade;
 ## Chat Schema & Modal
 
 - create chat / message schema & modal
-
-## TO DO -> authentication in websocket / only chat to user wo are connected
